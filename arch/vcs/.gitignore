@@ -1,0 +1,8 @@
+*/pkg
+*/src
+*/*.pkg.*
+./repo-make-custom.conf
+inexor-git/inexor
+inexor-data-git/inexor-data
+inexor-data-additional-git/inexor-data-additional
+libcef-git/libcef

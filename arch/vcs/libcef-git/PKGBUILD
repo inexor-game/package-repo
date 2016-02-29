@@ -1,0 +1,136 @@
+# libcef PKGBUILD
+# written by Benedikt Heine <benedikt@heine.rocks>
+
+# to speedup your configuration, set JOBS to a higher level.
+# By default (without declaring it here), gclient uses $(nproc)+2
+#_jobs="--jobs 1"               # recommended, if you debug the PKGBUILD
+#_jobs="--jobs $(($(nproc)*2))" # recommended, if you have got a powerful internet-connection
+
+_pkg=libcef 
+_pkgver=2171 # the branch you want to be based on.
+_buildtype=Release # this defines the buildtype. Debug also possible
+
+pkgname=$_pkg-git
+# take this as the branch-name you want to build on
+pkgver=2171.52.d4b462f
+pkgrel=1
+pkgdesc="Simple framework for embedding Chromium-based browsers in other applications."
+arch=('x86_64')
+url="https://bitbucket.org/chromiumembedded/cef"
+license=('BSD')
+
+provides=($_pkg)
+
+# TODO: this is empty
+# TODO: compare this with the makedepends array and push all really needed packages in depends too
+makedepends=(
+'python2'
+	'gtkglext'
+	'libpulse'
+	'lsb-release'
+	'libxss'
+	'libexif'
+	'libtinfo'
+	'gyp-git'
+	'libtinfo'
+	'depot-tools-git'
+)
+depends=()
+
+source=(
+	"$_pkg::git+https://bitbucket.org/chromiumembedded/cef.git"
+	"deps.patch"
+)
+sha256sums=(
+	'SKIP'
+	'f83e5006b27b2494a28f61431fb143b6719b5024d4e9fd18af072d04f62892fd'
+)
+
+# paths relative to $srcdir
+_path_chromium_src=chromium/src
+_path_cef_src=$_path_chromium_src/cef
+_builddir=out/$_buildtype
+
+pkgver(){
+	cd "$srcdir/$_pkg"
+
+	git checkout -t origin/$_pkgver &>> /dev/null
+	msg "pkgver: $_pkgver.$(git rev-list --count $_pkgver).$(git describe --always)"
+	echo "$_pkgver.$(git rev-list --count $_pkgver).$(git describe --always)"
+}
+
+prepare(){
+	_path_depot_tools=/opt/depot-tools-git
+	# if depot-tools is installed during compilation,
+	# we have to manually add the tools to path 
+	if which gclient; then
+		_path_gclient="gclient"
+	elif [ -e "$_path_depot_tools/gclient" ]; then
+		_path_gclient="$_path_depot_tools/gclient"
+	fi
+
+	# cut out the field chromium_checkout from JSON (without drawing new dependencies)
+	git -C $srcdir/$_pkg checkout -t origin/$_pkgver &>> /dev/null || git -C $srcdir/$_pkg checkout $_pkgver &>> /dev/null
+	_chromium_checkout_ref=$(awk '/chromium_checkout/{print $2}' $srcdir/$_pkg/CHROMIUM_BUILD_COMPATIBILITY.txt | tr -d ,\')
+
+	# quickfix, that gclient can download everything
+	export DEPOT_TOOLS_GSUTIL_BIN_DIR=$srcdir/gsutil
+
+	msg "Cloning Chromium"
+	mkdir -p $(dirname $srcdir/$_path_chromium_src)
+	cd $(dirname $srcdir/$_path_chromium_src)
+	[ ! -d "$srcdir/$_path_chromium_src" ] && fetch --nohooks chromium --nosvn=True
+
+	# if you're building a second time, with the same repo,
+	# some files are patched in gyp and the submodule checkout
+	# will fail because of uncommited changes
+	# this resets it, to state before last build
+	cd $srcdir/$_path_chromium_src
+	$_path_gclient recurse $_jobs git reset --hard
+
+	msg "Checking out Chromium commit '$_chromium_checkout_ref'"
+	cd $srcdir/$_path_chromium_src
+	git fetch
+	git checkout $_chromium_checkout_ref
+
+	# Patch things here.
+	# gclient won't have problems checking out the revision
+	msg "Patching Chromium before gclient sync"
+	git apply < $srcdir/deps.patch
+
+	msg "Getting Chromium Submodule dependencies"
+	$_path_gclient sync $_jobs --with_branch_heads
+
+	msg "Symlinking CEF into Chromium sourcetree"
+	cd $(dirname $srcdir/$_path_cef_src)
+  [ -d cef ] && rm -rf cef
+  cp -r $srcdir/libcef cef
+	cd $srcdir/$_path_cef_src
+	git checkout -t origin/$_pkgver || git checkout $_pkgver
+}
+
+build(){
+	# BUILD CEF
+	export GYP_GENERATORS=ninja
+	cd $srcdir/$_path_cef_src
+	./cef_create_projects.sh
+	cd $srcdir/$_path_chromium_src
+	ninja -C $_builddir cefclient cef_unittests chrome_sandbox libcef_dll_wrapper
+}
+
+package(){
+	cd $srcdir/$_path_cef_src/tools
+
+	mkdir -p $pkgdir/usr/share/libcef-full-list
+	./make_distrib.sh --ninja-build --output-dir=$pkgdir/usr/share/libcef-full-list --minimal
+
+	install -Dm755 $srcdir/$_path_chromium_src/$_builddir/lib/libcef.so "$pkgdir/usr/lib/libcef.so"
+	install -Dm755 $srcdir/$_path_chromium_src/$_builddir/obj/cef/libcef_dll_wrapper.a "$pkgdir/usr/lib/libcef_dll_wrapper.a"
+	cp -r "$srcdir/$_path_chromium_src/$_builddir/obj/cef/libcef_dll/" "$pkgdir/usr/lib"
+
+	mkdir -p $pkgdir/usr/include/
+	cp -r $srcdir/$_path_cef_src/include $pkgdir/usr/include/cef
+	# this is a bad fix
+	# TODO: contact the author and ask him, how we should change it
+	sed -i 's%^#include\s\s*"include/\(.*\)"%#include <cef/\1>%g' $(find $pkgdir/usr/include/ -type f)
+}

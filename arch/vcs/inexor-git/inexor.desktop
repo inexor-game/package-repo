@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Inexor
+Comment=Stays sauer. Becomes better.
+Exec=inexor
+Icon=inexor
+Terminal=false
+StartupNotify=false
+Categories=Application;Game;ActionGame;

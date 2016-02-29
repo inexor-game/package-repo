@@ -1,0 +1,35 @@
+#!/bin/sh
+
+_prefix=/usr
+_datadir=$_prefix/share/inexor/datapacks/
+_software=inexor
+_software_pkg=data
+_pkg=$_software-$_software_pkg
+
+pkgname=$_pkg-git
+pkgver=0.5.0_alpha_2_g132b660
+pkgrel=1
+pkgdesc="A sauerbraten fork. Stays sauer, becomes better. (Basic data package)"
+arch=(any)
+#TODO: license
+license=(custom)
+
+provides=($_pkg)
+
+source=(
+	"$_pkg::git+https://github.com/inexor-game/$_software_pkg.git"
+)
+sha256sums=(
+	'SKIP'
+)
+
+pkgver(){
+	cd "$srcdir/$_pkg"
+	git describe --tags --always --dirty | tr - _
+}
+
+package(){
+	mkdir -p "$pkgdir/$_datadir"
+	#                      copies to .../datapacks/(data|data-additional)
+	cp -r "$srcdir/$_pkg" "$pkgdir/$_datadir/$_software_pkg"
+}

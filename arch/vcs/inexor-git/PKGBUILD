@@ -1,0 +1,99 @@
+#!/bin/sh
+
+#TODO:
+# systemd-service
+# Release configuration instead of Debug
+
+_prefix=/usr
+_datadir=$_prefix/share/inexor/datapacks/
+_software=inexor
+_software_pkg=code
+_pkg=inexor
+
+pkgname=$_pkg-git
+pkgver=0.5.0_alpha_16_g191c191
+pkgrel=1
+pkgdesc="A sauerbraten fork. Stays sauer. Becomes better."
+arch=(x86_64)
+#TODO: license
+license=(custom)
+
+provides=($_pkg)
+
+# TODO: dependencies
+makedepends=(
+	"git"
+	"cmake"
+)
+depends=(
+	"sdl2"
+	"sdl2_gfx"
+	"sdl2_image"
+	"sdl2_mixer"
+	"protobuf"
+	"mesa"
+	"mesa-libgl"
+	"enet"
+	"boost"
+	"boost-libs"
+	"pango"
+	"cairo"
+	"libxi"
+	"libxcomposite"
+	"alsa-lib"
+	"libxtst"
+	"gconf"
+	"libxrandr"
+	"libcef"
+	"inexor-data"
+)
+optdepends=(
+	"inexor-data-additional: Additional map and model packs"
+)
+
+source=(
+	"$_pkg::git+https://github.com/inexor-game/$_software_pkg.git"
+	"inexor.desktop"
+	"inexor.png"
+	"inexor.sh"
+)
+sha256sums=(
+	'SKIP'
+	'bc26387473aae1d0c540b6c731e39a9bae116fc86c79e3ae52bc07b170d1a3fd'
+	'7c11b93320632f87b7705df0a835d1e9bc3d249963635eae5282977ab3e81e27'
+	'2404062698285a878c56ce7e023020dbce9fef608cf7190bb52c9e66b2a68e1f'
+)
+
+pkgver(){
+	cd "$srcdir/$_pkg"
+	git describe --tags --always --dirty | tr - _
+}
+
+prepare(){
+	cd "$srcdir/$_pkg"
+	git submodule update --init --recursive
+
+	# patch the system to use libcef from system. This is ugly, @bebehei knows
+	# TODO: fix the cmake files and remove this ;-)
+	cd "$srcdir/$_pkg/"
+	git pull --ff-only https://github.com/bebehei/inexor-code.git master-libcef-removed
+	cd "$srcdir/$_pkg/platform"
+	git pull --ff-only https://github.com/bebehei/platform.git master-libcef-removed
+}
+
+build(){
+	mkdir -p "$srcdir/build"
+	cd "$srcdir/build"
+	#TODO: CMAKE_INSTALL_PREFIX is not used yet, we have to merge PRs
+	# TODO: debug configuriation/release config
+	cmake -DCMAKE_INSTALL_PREFIX="$_prefix" "$srcdir/$_pkg"
+	make
+}
+
+package(){
+	cd "$srcdir/build"
+	make DESTDIR="$pkgdir" install
+	install -Dm644 "$srcdir/inexor.png" "$pkgdir/usr/share/pixmaps/inexor.png"
+	install -Dm644 "$srcdir/inexor.desktop" "$pkgdir/usr/share/applications/inexor.desktop"
+	install -Dm755 "$srcdir/inexor.sh" "$pkgdir/usr/bin/inexor"
+}

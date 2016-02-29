@@ -1,0 +1,38 @@
+diff --git a/.DEPS.git b/.DEPS.git
+index d852d8b..c2ea38b 100644
+--- a/.DEPS.git
++++ b/.DEPS.git
+@@ -184,9 +184,9 @@ deps = {
+     'src/third_party/jsoncpp/source/src/lib_json':
+         Var('git_url') + '/external/jsoncpp/jsoncpp/src/lib_json.git@a8caa51ba2f80971a45880425bf2ae864a786784',
+     'src/third_party/leveldatabase/src':
+-        Var('git_url') + '/external/leveldb.git@3f77584eb3f9754bbb7079070873ece3f30a1e6b',
++        Var('git_url') + '/external/leveldb.git@e353fbc7ea81f12a5694991b708f8f45343594b1',
+     'src/third_party/libaddressinput/src':
+-        Var('git_url') + '/external/libaddressinput.git@945d96387a716d0d82b195fa69a5e9a701249517',
++        'https://android.googlesource.com/platform/external/chromium_org/third_party/libaddressinput/src@945d96387a716d0d82b195fa69a5e9a701249517',
+     'src/third_party/libc++/trunk':
+         Var('git_url') + '/chromium/llvm-project/libcxx.git@48198f9110397fff47fe7c37cbfa296be7d44d3d',
+     'src/third_party/libc++abi/trunk':
+diff --git a/DEPS b/DEPS
+index 9e51c85..089982a 100644
+--- a/DEPS
++++ b/DEPS
+@@ -313,7 +313,7 @@ deps = {
+   'src/third_party/cacheinvalidation/src':
+     (Var("git.chromium.org")) + '/external/google-cache-invalidation-api/src.git@c91bd9d9fed06bf440be64f87b94a2effdb32bc4',
+   'src/third_party/leveldatabase/src':
+-    (Var("git.chromium.org")) + '/external/leveldb.git@3f77584eb3f9754bbb7079070873ece3f30a1e6b',
++    (Var("git.chromium.org")) + '/external/leveldb.git@e353fbc7ea81f12a5694991b708f8f45343594b1',
+   'build':
+     '/trunk/tools/build@292166',
+   'src/tools/gyp':
+@@ -333,7 +333,7 @@ deps = {
+   'src/third_party/webdriver/pylib':
+     (Var("git.chromium.org")) + '/external/selenium/py.git@5fd78261a75fe08d27ca4835fb6c5ce4b42275bd',
+   'src/third_party/libaddressinput/src':
+-    (Var("git.chromium.org")) + '/external/libaddressinput.git@945d96387a716d0d82b195fa69a5e9a701249517',
++    'https://android.googlesource.com/platform/external/chromium_org/third_party/libaddressinput/src@945d96387a716d0d82b195fa69a5e9a701249517',
+   'build/scripts/gsd_generate_index':
+     '/trunk/tools/gsd_generate_index@164784',
+   'src/chrome/browser/resources/pdf/html_office':
