@@ -1,0 +1,9 @@
+[submodule "arch/vcs/aur/gyp-git"]
+	path = arch/vcs/aur/gyp-git
+	url = https://aur.archlinux.org/gyp-git.git
+[submodule "arch/vcs/aur/libtinfo"]
+	path = arch/vcs/aur/libtinfo
+	url = https://aur.archlinux.org/libtinfo.git
+[submodule "arch/vcs/aur/depot-tools-git"]
+	path = arch/vcs/aur/depot-tools-git
+	url = https://aur.archlinux.org/depot-tools-git.git
