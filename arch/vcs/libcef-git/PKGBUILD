@@ -6,6 +6,10 @@
 #_jobs="--jobs 1"               # recommended, if you debug the PKGBUILD
 #_jobs="--jobs $(($(nproc)*2))" # recommended, if you have got a powerful internet-connection
 
+# If the login-shell spawned before depot-tools-git is installed,
+# gclient and fetch won't get found
+export PATH=$PATH:/opt/depot-tools-git
+
 _pkg=libcef 
 _pkgver=2171 # the branch you want to be based on.
 _buildtype=Release # this defines the buildtype. Debug also possible
@@ -60,14 +64,6 @@ pkgver(){
 }
 
 prepare(){
-	_path_depot_tools=/opt/depot-tools-git
-	# if depot-tools is installed during compilation,
-	# we have to manually add the tools to path 
-	if which gclient; then
-		_path_gclient="gclient"
-	elif [ -e "$_path_depot_tools/gclient" ]; then
-		_path_gclient="$_path_depot_tools/gclient"
-	fi
 
 	# cut out the field chromium_checkout from JSON (without drawing new dependencies)
 	git -C $srcdir/$_pkg checkout -t origin/$_pkgver &>> /dev/null || git -C $srcdir/$_pkg checkout $_pkgver &>> /dev/null
@@ -86,7 +82,7 @@ prepare(){
 	# will fail because of uncommited changes
 	# this resets it, to state before last build
 	cd $srcdir/$_path_chromium_src
-	$_path_gclient recurse $_jobs git reset --hard
+	gclient recurse $_jobs git reset --hard
 
 	msg "Checking out Chromium commit '$_chromium_checkout_ref'"
 	cd $srcdir/$_path_chromium_src
@@ -99,7 +95,7 @@ prepare(){
 	git apply < $srcdir/deps.patch
 
 	msg "Getting Chromium Submodule dependencies"
-	$_path_gclient sync $_jobs --with_branch_heads
+	gclient sync $_jobs --with_branch_heads
 
 	msg "Symlinking CEF into Chromium sourcetree"
 	cd $(dirname $srcdir/$_path_cef_src)
