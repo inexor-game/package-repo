@@ -99,8 +99,8 @@ prepare(){
 
 	msg "Symlinking CEF into Chromium sourcetree"
 	cd $(dirname $srcdir/$_path_cef_src)
-  [ -d cef ] && rm -rf cef
-  cp -r $srcdir/libcef cef
+	[ -d cef ] && rm -rf cef
+	cp -r $srcdir/libcef cef
 	cd $srcdir/$_path_cef_src
 	git checkout -t origin/$_pkgver || git checkout $_pkgver
 }
