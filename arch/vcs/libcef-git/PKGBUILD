@@ -38,6 +38,9 @@ makedepends=(
 	'gyp-git'
 	'libtinfo'
 	'depot-tools-git'
+	# Chromium ships its own clang compiler. And there is no easy or official way to replace it.
+	# The clang compiler is not compatible with the current 2.23 glibc in ArchLinux
+	'glibc<=2.22'
 )
 depends=()
 
