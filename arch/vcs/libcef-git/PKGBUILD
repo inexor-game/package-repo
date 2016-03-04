@@ -41,6 +41,8 @@ makedepends=(
 	# Chromium ships its own clang compiler. And there is no easy or official way to replace it.
 	# The clang compiler is not compatible with the current 2.23 glibc in ArchLinux
 	'glibc<=2.22'
+	'python'
+	'python2'
 )
 depends=()
 
@@ -67,6 +69,11 @@ pkgver(){
 }
 
 prepare(){
+
+	if [ $(python -c 'import sys; print(sys.version_info.major)') -ne 2 ]; then
+		msg "The command 'python' has to point to Python Interpreter Version 2!"
+		return 1
+	fi
 
 	# cut out the field chromium_checkout from JSON (without drawing new dependencies)
 	git -C $srcdir/$_pkg checkout -t origin/$_pkgver &>> /dev/null || git -C $srcdir/$_pkg checkout $_pkgver &>> /dev/null
