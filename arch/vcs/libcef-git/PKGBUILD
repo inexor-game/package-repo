@@ -43,6 +43,9 @@ makedepends=(
 	'glibc<=2.22'
 	'python'
 	'python2'
+	'nss'
+	'gconf'
+	'libgnome-keyring'
 )
 depends=()
 
