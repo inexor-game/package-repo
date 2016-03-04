@@ -61,7 +61,7 @@ _builddir=out/$_buildtype
 pkgver(){
 	cd "$srcdir/$_pkg"
 
-	git checkout -t origin/$_pkgver &>> /dev/null
+	git checkout -B origin/$_pkgver &>> /dev/null
 	msg "pkgver: $_pkgver.$(git rev-list --count $_pkgver).$(git describe --always)"
 	echo "$_pkgver.$(git rev-list --count $_pkgver).$(git describe --always)"
 }
