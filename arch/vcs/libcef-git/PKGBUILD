@@ -11,12 +11,12 @@
 export PATH=$PATH:/opt/depot-tools-git
 
 _pkg=libcef 
-_pkgver=2171 # the branch you want to be based on.
+_pkgver=2526 # the branch you want to be based on.
 _buildtype=Release # this defines the buildtype. Debug also possible
 
 pkgname=$_pkg-git
 # take this as the branch-name you want to build on
-pkgver=2171.52.d4b462f
+pkgver=2526.1373.b660893
 pkgrel=1
 pkgdesc="Simple framework for embedding Chromium-based browsers in other applications."
 arch=('x86_64')
@@ -51,11 +51,9 @@ depends=()
 
 source=(
 	"$_pkg::git+https://bitbucket.org/chromiumembedded/cef.git"
-	"deps.patch"
 )
 sha256sums=(
 	'SKIP'
-	'f83e5006b27b2494a28f61431fb143b6719b5024d4e9fd18af072d04f62892fd'
 )
 
 # paths relative to $srcdir
@@ -101,11 +99,6 @@ prepare(){
 	cd $srcdir/$_path_chromium_src
 	git fetch
 	git checkout $_chromium_checkout_ref
-
-	# Patch things here.
-	# gclient won't have problems checking out the revision
-	msg "Patching Chromium before gclient sync"
-	git apply < $srcdir/deps.patch
 
 	msg "Getting Chromium Submodule dependencies"
 	gclient sync $_jobs --with_branch_heads
