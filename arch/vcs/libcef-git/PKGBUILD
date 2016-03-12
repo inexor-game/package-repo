@@ -39,12 +39,10 @@ makedepends=(
 	'gyp-git'
 	'libtinfo'
 	'depot-tools-git'
-	# Chromium ships its own clang compiler. And there is no easy or official way to replace it.
-	# The clang compiler is not compatible with the current 2.23 glibc in ArchLinux
-	'glibc<=2.22'
 	'nss'
 	'gconf'
 	'libgnome-keyring'
+	'clang'
 )
 depends=()
 
@@ -69,6 +67,16 @@ pkgver(){
 }
 
 prepare(){
+	return 0
+	# 1. Use the local installed compiler from ArchLinux
+	#    This is neccessary as the pre-shipped ld.gold linker is not compatible to glibc version => 2.23
+	#    So we're defining make_clang_dir to point to /usr/bin/clang and remove the shipped ld.gold compiler
+	#    after generating everything.
+	#
+	# 2. Ignore all warnings and *don't* treat them as errors.
+	#    The chromium devs are only allowed to merge their code, if it won't produce any warnings.
+	#    But we don't want to check our code, we want to build it!
+	export GYP_DEFINES="make_clang_dir=/usr werror="
 
 	if [ $(python -c 'import sys; print(sys.version_info.major)') -ne 2 ]; then
 		msg "The command 'python' has to point to Python Interpreter Version 2!"
@@ -108,6 +116,9 @@ prepare(){
 	cp -r $srcdir/libcef cef
 	cd $srcdir/$_path_cef_src
 	git checkout -t origin/$_pkgver || git checkout $_pkgver
+
+	# See note above. Here after generating all sources, we delete the incompatible ld.gold linker.
+	rm -rf "$srcdir/$_path_chromium_src/third_party/binutils/Linux_x64/Release/bin/"
 }
 
 build(){
