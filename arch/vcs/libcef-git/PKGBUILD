@@ -28,7 +28,8 @@ provides=($_pkg)
 # TODO: this is empty
 # TODO: compare this with the makedepends array and push all really needed packages in depends too
 makedepends=(
-'python2'
+	'python'
+	'python2'
 	'gtkglext'
 	'libpulse'
 	'lsb-release'
@@ -41,8 +42,6 @@ makedepends=(
 	# Chromium ships its own clang compiler. And there is no easy or official way to replace it.
 	# The clang compiler is not compatible with the current 2.23 glibc in ArchLinux
 	'glibc<=2.22'
-	'python'
-	'python2'
 	'nss'
 	'gconf'
 	'libgnome-keyring'
