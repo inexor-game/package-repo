@@ -2,9 +2,11 @@
 # written by Benedikt Heine <benedikt@heine.rocks>
 
 # to speedup your configuration, set JOBS to a higher level.
-# By default (without declaring it here), gclient uses $(nproc)+2
-#_jobs="--jobs 1"               # recommended, if you debug the PKGBUILD
-#_jobs="--jobs $(($(nproc)*2))" # recommended, if you have got a powerful internet-connection
+# By default (without declaring it here):
+#   - ninja uses $(nproc)+2
+#   - gclient uses $(nproc)
+#_jobs="-j 1"               # recommended, if you debug the PKGBUILD
+#_jobs="-j $(($(nproc)*2))" # recommended, if you have got a powerful internet-connection
 
 # If the login-shell spawned before depot-tools-git is installed,
 # gclient and fetch won't get found
@@ -127,7 +129,7 @@ build(){
 	cd $srcdir/$_path_cef_src
 	./cef_create_projects.sh
 	cd $srcdir/$_path_chromium_src
-	ninja -C $_builddir cefclient cef_unittests chrome_sandbox libcef_dll_wrapper
+	ninja -C $_builddir $_jobs cefclient cef_unittests chrome_sandbox libcef_dll_wrapper
 }
 
 package(){
